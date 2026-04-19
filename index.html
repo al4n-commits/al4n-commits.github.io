@@ -531,6 +531,7 @@ const UI = {
   pl: {
     sidebar: "Dostępni Lordowie",
     empty: "Wybierz lorda z listy",
+    no_lords: "Aktualnie nie ma tu lordów",
     history: "Historia & Taktyka",
     variants: "Warianty Zamków",
     download: "Pobierz Plik",
@@ -541,6 +542,7 @@ const UI = {
   en: {
     sidebar: "Available Lords",
     empty: "Select a lord",
+    no_lords: "No lords available here",
     history: "History & Tactics",
     variants: "Castle Variants",
     download: "Download File",
@@ -598,8 +600,28 @@ function refreshUI() {
   ).join('');
 
   document.getElementById('sidebar-lbl').innerText = UI[lang].sidebar;
+
+  const filtered = LORDS.filter(l => currentCat==='all' || l.category===currentCat);
+
+  // Jeśli aktywny lord nie jest w tej kategorii, zresetuj
+  if (activeLordId && !filtered.find(l => l.id === activeLordId)) {
+    activeLordId = null;
+  }
+
+  // Auto-wybierz pierwszego lorda jeśli żaden nie jest aktywny
+  if (!activeLordId && filtered.length > 0) {
+    activeLordId = filtered[0].id;
+    // Zastosuj kolor kategorii tego lorda
+    const lordCat = CATEGORIES.find(c => c.id === filtered[0].category);
+    if (lordCat) applyTheme(lordCat.theme, lordCat.hi);
+  }
+
   renderSidebar();
-  activeLordId ? showLord(activeLordId) : renderEmpty();
+  if (filtered.length === 0) {
+    renderNoLords();
+  } else {
+    showLord(activeLordId);
+  }
 }
 
 function renderEmpty() {
@@ -607,6 +629,14 @@ function renderEmpty() {
     <div class="empty-state">
       <div class="empty-crest">⚔</div>
       <div class="empty-text">${UI[lang].empty}</div>
+    </div>`;
+}
+
+function renderNoLords() {
+  document.getElementById('main-panel').innerHTML = `
+    <div class="empty-state">
+      <div class="empty-crest">🏰</div>
+      <div class="empty-text">${UI[lang].no_lords}</div>
     </div>`;
 }
 
@@ -628,6 +658,10 @@ function showLord(id) {
   const t = UI[lang];
   const link = lang==='pl' ? l.media_pl : l.media_en;
   const hasPortrait = l.avatar && l.avatar !== "";
+
+  // Zastosuj kolor kategorii tego lorda (nawet jeśli jesteś w "Wszystkie")
+  const lordCat = CATEGORIES.find(c => c.id === l.category);
+  if (lordCat) applyTheme(lordCat.theme, lordCat.hi);
 
   renderSidebar();
 
