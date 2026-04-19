@@ -6,19 +6,21 @@
 <title>Mejker's Ai lord Files</title>
 <style>
 :root {
-  --bg-dark: #0a0a0a; --stone: #1a1a1a; --iron: #333; --gold: #a67c00; --gold-hi: #ffcc33;
+  --bg-dark: #0a0a0a; --stone: #1a1a1a; --iron: #333; 
+  /* Kolory bazowe - będą nadpisywane przez JS */
+  --gold: #a67c00; --gold-hi: #ffcc33;
   --fire: #ff4500; --parchment: #d4c4a8; --text-dim: #888;
 }
 * { margin:0; padding:0; box-sizing:border-box; border-radius: 0 !important; }
 
 body { 
   background: var(--bg-dark); 
-  /* Ustawienie ARIAL jako głównej czcionki */
   font-family: Arial, Helvetica, sans-serif; 
   color: var(--parchment); 
   min-height: 100vh; 
   overflow-x: hidden; 
   font-size: 16px;
+  transition: background 0.5s ease;
 }
 
 .bg-fix { position:fixed; inset:0; z-index:0; background: linear-gradient(180deg, #050505 0%, #1a1108 100%); }
@@ -28,22 +30,22 @@ body {
 /* Header */
 .site-header { text-align:center; padding:40px 20px; border-bottom: 4px solid var(--iron); background: rgba(0,0,0,0.85); position: relative; }
 .lang-switch { position: absolute; top: 15px; right: 20px; display: flex; gap: 5px; }
-.lang-btn { background: #000; border: 1px solid var(--iron); color: var(--text-dim); padding: 8px 12px; cursor: pointer; font-weight: bold; font-family: Arial, sans-serif; }
+.lang-btn { background: #000; border: 1px solid var(--iron); color: var(--text-dim); padding: 8px 12px; cursor: pointer; font-weight: bold; }
 .lang-btn.active { border-color: var(--gold); color: var(--gold-hi); background: var(--stone); }
 
-h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); color: var(--gold); text-transform: uppercase; letter-spacing: 2px; font-family: Arial, sans-serif; }
+h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); color: var(--gold); text-transform: uppercase; letter-spacing: 2px; transition: color 0.3s; }
 
 /* Zakładki */
-.cat-tabs { display: flex; justify-content: center; background: var(--stone); border-bottom: 2px solid var(--gold); }
-.cat-btn { padding: 15px 25px; background: transparent; border: none; color: var(--text-dim); text-transform: uppercase; cursor: pointer; font-weight: bold; font-family: Arial, sans-serif; font-size: 0.85rem; }
+.cat-tabs { display: flex; justify-content: center; background: var(--stone); border-bottom: 2px solid var(--gold); transition: border-color 0.3s; }
+.cat-btn { padding: 15px 25px; background: transparent; border: none; color: var(--text-dim); text-transform: uppercase; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
 .cat-btn.active { color: #000; background: var(--gold); }
 
 .body-wrap { display:flex; flex:1; }
 
 /* Sidebar */
 .sidebar { width: 280px; background: rgba(10,10,10,0.95); border-right: 2px solid var(--iron); padding: 20px 0; }
-.sidebar-label { padding: 0 15px 10px; font-size: 0.75rem; color: var(--gold); border-bottom: 1px solid var(--iron); margin-bottom: 10px; text-transform: uppercase; font-family: Arial, sans-serif; }
-.lord-btn { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 15px; background: transparent; border: none; border-left: 4px solid transparent; cursor: pointer; text-align: left; color: inherit; font-family: Arial, sans-serif; }
+.sidebar-label { padding: 0 15px 10px; font-size: 0.75rem; color: var(--gold); border-bottom: 1px solid var(--iron); margin-bottom: 10px; text-transform: uppercase; }
+.lord-btn { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 15px; background: transparent; border: none; border-left: 4px solid transparent; cursor: pointer; text-align: left; color: inherit; }
 .lord-btn:hover { background: rgba(255,255,255,0.05); }
 .lord-btn.on { background: rgba(166, 124, 0, 0.2); border-left-color: var(--gold); }
 
@@ -58,24 +60,32 @@ h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); color: var(--gold); text-transform: 
 .portrait-large.has-img { border: 3px solid var(--gold); }
 .portrait-large img { width: 100%; height: 100%; object-fit: cover; }
 
-.title-area h2 { font-size: 2.2rem; color: var(--gold-hi); margin-bottom: 5px; font-family: Arial, sans-serif; }
+.title-area h2 { font-size: 2.2rem; color: var(--gold-hi); margin-bottom: 5px; }
 .tags-row { display: flex; flex-wrap: wrap; gap: 8px; }
-.tag { background: #222; border: 1px solid var(--gold); color: var(--gold); padding: 2px 10px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; font-family: Arial, sans-serif; }
+.tag { background: #222; border: 1px solid var(--gold); color: var(--gold); padding: 2px 10px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
 
 .description { font-size: 1.1rem; line-height: 1.6; font-style: italic; color: #ccc; margin-bottom: 30px; }
-.section-label { color: var(--gold); border-bottom: 1px solid var(--iron); margin-bottom: 15px; padding-bottom: 5px; text-transform: uppercase; margin-top: 20px; font-weight: bold; font-size: 0.85rem; font-family: Arial, sans-serif; }
+.section-label { color: var(--gold); border-bottom: 1px solid var(--iron); margin-bottom: 15px; padding-bottom: 5px; text-transform: uppercase; margin-top: 20px; font-weight: bold; font-size: 0.85rem; }
 
 /* Galeria */
 .castle-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-.gallery-img { width: 100%; height: 200px; border: 2px solid var(--iron); object-fit: cover; transition: 0.2s; }
-.gallery-img:hover { border-color: var(--gold-hi); }
+.gallery-img { width: 100%; height: 200px; border: 2px solid var(--iron); object-fit: cover; transition: 0.2s; cursor: zoom-in; }
+.gallery-img:hover { border-color: var(--gold-hi); transform: scale(1.02); }
 
 /* Download */
 .dl-section { margin-top: 40px; padding: 25px; background: rgba(0,0,0,0.5); border: 2px solid var(--iron); }
-.btn-dl { display: inline-block; background: var(--gold); color: #000; padding: 12px 25px; text-decoration: none; font-weight: bold; margin-bottom: 20px; text-transform: uppercase; font-family: Arial, sans-serif; }
+.btn-dl { display: inline-block; background: var(--gold); color: #000; padding: 12px 25px; text-decoration: none; font-weight: bold; margin-bottom: 20px; text-transform: uppercase; }
 .install-path { font-size: 0.9rem; color: var(--text-dim); font-family: 'Courier New', monospace; background: #000; padding: 15px; border-left: 4px solid var(--fire); }
 
-.empty-state { text-align: center; margin-top: 100px; opacity: 0.5; font-size: 1.5rem; font-family: Arial, sans-serif; }
+/* Modal Lightbox */
+#modal-overlay { 
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); 
+  z-index: 1000; cursor: zoom-out; place-items: center; padding: 20px; 
+}
+#modal-overlay.open { display: grid; }
+#modal-img { max-width: 90%; max-height: 90%; border: 4px solid var(--gold); box-shadow: 0 0 50px rgba(0,0,0,1); }
+
+.empty-state { text-align: center; margin-top: 100px; opacity: 0.5; font-size: 1.5rem; }
 
 @media (max-width: 800px) { .body-wrap { flex-direction: column; } .sidebar { width: 100%; } }
 </style>
@@ -84,6 +94,10 @@ h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); color: var(--gold); text-transform: 
 
 <div class="bg-fix"></div>
 <canvas id="dust"></canvas>
+
+<div id="modal-overlay" onclick="closeModal()">
+    <img id="modal-img" src="" alt="Powiększenie">
+</div>
 
 <div class="page">
   <header class="site-header">
@@ -106,8 +120,9 @@ h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); color: var(--gold); text-transform: 
 <script>
 /* --- DANE --- */
 const CATEGORIES = [
-    { id: "all",  pl: "Wszystkie", en: "All" },
-    { id: "t2",   pl: "Twierdza 2", en: "Stronghold 2" }
+    { id: "all", pl: "Wszystkie", en: "All", theme: "#a67c00", hi: "#ffcc33" },
+    { id: "t2",  pl: "Twierdza 2", en: "Stronghold 2", theme: "#d4af37", hi: "#f9e076" },
+    { id: "t1",  pl: "Twierdza 1", en: "Stronghold 1", theme: "#7c0000", hi: "#ff4444" } // Przykład innej zakładki
 ];
 
 const LORDS = [
@@ -119,12 +134,9 @@ const LORDS = [
     avatar: "Avatarog.png", 
     tags_pl: ["Agresywny", "Wiking", "2 Zamki"],
     tags_en: ["Aggressive", "Viking", "2 Castles"],
-    desc_pl: "Olaf to AI o przeciętnym poziomie trudności, jednak nie należy go lekceważyć.Posiada dwa zamki, mocno inspirowane tymi, które budował w Twierdzy 2.Ze względu na to, że w tej grze nie ma berserkerów ani miotaczy toporów, musiałem zastąpić ich innymi jednostkami.",
-    desc_en: "Olaf is an AI with an average level of difficulty, but he should not be underestimated. He has two castles, heavily inspired by the ones he built in Stronghold 2. Since there are no berserkers or axe throwers in this game, I had to replace them with other units.",
-        castle_imgs: [
-        "olaf1.png",
-        "olaf2.png"
-    ],
+    desc_pl: "Olaf to AI o przeciętnym poziomie trudności, jednak nie należy go lekceważyć. Posiada dwa zamki, mocno inspirowane tymi, które budował w Twierdzy 2.",
+    desc_en: "Olaf is an AI with an average level of difficulty, but he should not be underestimated.",
+    castle_imgs: ["olaf1.png", "olaf2.png"],
     media_pl: "https://github.com/al4n-commits/Boty-Twierdza-2-w-krzy-owcu./raw/refs/heads/main/Olaf%20Grimtooth.rar",
     media_en: "#"
   },
@@ -136,27 +148,34 @@ const LORDS = [
     avatar: "avatarse.png", 
     tags_pl: ["Słaby", "Tchórz", "3 Zamki"],
     tags_en: ["Weak", "Coward", "3 Castles"],
-    desc_pl: "Edwin to dość niezdarny lord, jednak im dłużej pozostaje w grze, tym częściej i liczniej wysyła swoje oddziały. Posiada trzy zamki, mocno inspirowane tymi, które budował w Twierdzy 2.",
-    desc_en: "Edwin is a rather clumsy lord, but the longer he stays in the game, the more frequently and numerously he sends out his troops. He has three castles, heavily inspired by the ones he built in Stronghold 2.",
-    castle_imgs: [
-        "edwin1.jpg",
-        "edwin2.jpg",
-        "edwin3.jpg"
-    ],
+    desc_pl: "Edwin to dość niezdarny lord, jednak im dłużej pozostaje w grze, tym częściej wysyła swoje oddziały.",
+    desc_en: "Edwin is a rather clumsy lord, but the longer he stays in the game, the more frequently he sends out his troops.",
+    castle_imgs: ["edwin1.jpg", "edwin2.jpg", "edwin3.jpg"],
     media_pl: "https://github.com/al4n-commits/Boty-Twierdza-2-w-krzy-owcu./raw/refs/heads/main/Sir%20Edwin.rar", 
     media_en: "#"
   }
 ];
 
 const UI = {
-    pl: { sidebar: "Dost\u0119pni Lordowie", empty: "Wybierz lorda z listy", history: "Historia / Taktyka", variants: "Warianty Zamk\u00f3w", download: "Pobierz Media", btn_media: "POBIERZ PACZK\u0118 PL", no_file: "Plik niedost\u0119pny", install: "Instrukcja: Wypakuj do:" },
+    pl: { sidebar: "Dostępni Lordowie", empty: "Wybierz lorda z listy", history: "Historia / Taktyka", variants: "Warianty Zamków", download: "Pobierz Media", btn_media: "POBIERZ PACZKĘ PL", no_file: "Plik niedostępny", install: "Instrukcja: Wypakuj do:" },
     en: { sidebar: "Available Lords", empty: "Select a lord", history: "History / Tactics", variants: "Castle Variants", download: "Download Media", btn_media: "DOWNLOAD ENG PACK", no_file: "File not available", install: "Guide: Extract to:" }
 };
 
 /* --- LOGIKA --- */
 let lang = 'pl'; let currentCat = 'all'; let activeLordId = null;
+
 function setLang(l) { lang = l; refreshUI(); }
-function filterCat(cat) { currentCat = cat; refreshUI(); }
+
+function filterCat(catId) { 
+    currentCat = catId; 
+    // Zmiana kolorów na podstawie kategorii
+    const cat = CATEGORIES.find(c => c.id === catId);
+    if(cat) {
+        document.documentElement.style.setProperty('--gold', cat.theme);
+        document.documentElement.style.setProperty('--gold-hi', cat.hi);
+    }
+    refreshUI(); 
+}
 
 function refreshUI() {
     document.getElementById('btn-pl').classList.toggle('active', lang === 'pl');
@@ -193,10 +212,23 @@ function showLord(id) {
         <div class="card-head"><div class="portrait-large ${hasPortrait?'has-img':''}">${hasPortrait ? `<img src="${l.avatar}">` : l.icon}</div>
         <div class="title-area"><h2>${l.name}</h2><div class="tags-row">${(lang==='pl'?l.tags_pl:l.tags_en).map(tag => `<span class="tag">${tag}</span>`).join('')}</div></div></div>
         <div class="section-label">${t.history}</div><p class="description">${lang==='pl'?l.desc_pl:l.desc_en}</p>
-        <div class="section-label">${t.variants} (${l.castle_imgs.length})</div><div class="castle-gallery">${l.castle_imgs.map(img => `<img src="${img}" class="gallery-img">`).join('')}</div>
+        <div class="section-label">${t.variants} (${l.castle_imgs.length})</div>
+        <div class="castle-gallery">${l.castle_imgs.map(img => `<img src="${img}" class="gallery-img" onclick="openModal('${img}')">`).join('')}</div>
         <div class="dl-section"><div class="section-label">${t.download}</div>${(currentLink && currentLink !== '#') ? `<a href="${currentLink}" class="btn-dl">${t.btn_media}</a>` : `<span style="color:var(--fire)">${t.no_file}</span>`}
         <div class="install-path"><strong>${t.install}</strong><br><code>AppData\\LocalLow\\Firefly Studios\\Stronghold Crusader Definitive Edition\\CustomMedia</code></div></div>`;
 }
+
+/* MODAL LOGIC */
+function openModal(src) {
+    const modal = document.getElementById('modal-overlay');
+    const modalImg = document.getElementById('modal-img');
+    modalImg.src = src;
+    modal.classList.add('open');
+}
+function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+}
+
 setLang('pl');
 
 /* --- FIRE ASH --- */
