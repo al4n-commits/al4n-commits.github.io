@@ -3,140 +3,511 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mejker's Ai lord Files</title>
+<title>Mejker's Ai Lord Files</title>
+<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg-dark: #0a0a0a; --stone: #1a1a1a; --iron: #333; 
-  /* Kolory bazowe - będą nadpisywane przez JS */
-  --gold: #a67c00; --gold-hi: #ffcc33;
-  --fire: #ff4500; --parchment: #d4c4a8; --text-dim: #888;
-}
-* { margin:0; padding:0; box-sizing:border-box; border-radius: 0 !important; }
+  --bg:      #0a0a0a;
+  --stone:   #1a1a1a;
+  --iron:    #2a2a2a;
+  --gold:    #a67c00;
+  --gold-hi: #ffcc33;
+  --fire:    #ff4500;
+  --parchment: #d4c4a8;
+  --dim:     #666;
 
-body { 
-  background: var(--bg-dark); 
-  font-family: Arial, Helvetica, sans-serif; 
-  color: var(--parchment); 
-  min-height: 100vh; 
-  overflow-x: hidden; 
-  font-size: 16px;
-  transition: background 0.5s ease;
+  /* Ramka - warstwy */
+  --frame-outer: var(--gold);
+  --frame-mid:   #111;
+  --frame-inner: color-mix(in srgb, var(--gold) 35%, transparent);
+  --frame-glow:  color-mix(in srgb, var(--gold) 12%, transparent);
 }
 
-.bg-fix { position:fixed; inset:0; z-index:0; background: linear-gradient(180deg, #050505 0%, #1a1108 100%); }
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  font-family: 'EB Garamond', Georgia, serif;
+  color: var(--parchment);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ══════════════════════════════════════
+   SYSTEM RAMEK
+══════════════════════════════════════ */
+
+/* Ramka bazowa - replikuje PNG: gruba zewnętrzna + cienka wewnętrzna + przerwa */
+.framed {
+  position: relative;
+}
+.framed::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 4px solid var(--frame-outer);
+  pointer-events: none;
+  z-index: 10;
+  transition: border-color 0.4s;
+}
+.framed::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid var(--frame-inner);
+  pointer-events: none;
+  z-index: 10;
+  transition: border-color 0.4s, box-shadow 0.4s;
+  box-shadow: 0 0 8px var(--frame-glow);
+}
+
+/* Wariant cienki (sidebar, tagi, przyciski) */
+.framed-sm::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--frame-outer);
+  pointer-events: none;
+  z-index: 10;
+  transition: border-color 0.4s;
+}
+.framed-sm::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px solid var(--frame-inner);
+  pointer-events: none;
+  z-index: 10;
+  transition: border-color 0.4s;
+}
+
+/* Ramka aktywna/hover - jaśniejszy kolor */
+.framed:hover::before, .framed-sm:hover::before {
+  border-color: var(--gold-hi);
+}
+
+/* ══════════════════════════════════════
+   CANVAS - POPIOŁY
+══════════════════════════════════════ */
 #dust { position:fixed; inset:0; z-index:1; pointer-events:none; }
+
+/* ══════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════ */
 .page { position:relative; z-index:2; display:flex; flex-direction:column; min-height:100vh; }
 
-/* Header */
-.site-header { text-align:center; padding:40px 20px; border-bottom: 4px solid var(--iron); background: rgba(0,0,0,0.85); position: relative; }
-.lang-switch { position: absolute; top: 15px; right: 20px; display: flex; gap: 5px; }
-.lang-btn { background: #000; border: 1px solid var(--iron); color: var(--text-dim); padding: 8px 12px; cursor: pointer; font-weight: bold; }
-.lang-btn.active { border-color: var(--gold); color: var(--gold-hi); background: var(--stone); }
+/* ══════════════════════════════════════
+   HEADER
+══════════════════════════════════════ */
+.site-header {
+  text-align: center;
+  padding: 36px 20px 28px;
+  background: rgba(0,0,0,0.9);
+  position: relative;
+  margin: 12px;
+}
 
-h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); color: var(--gold); text-transform: uppercase; letter-spacing: 2px; transition: color 0.3s; }
+.lang-switch {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 6px;
+}
+.lang-btn {
+  position: relative;
+  background: #000;
+  color: var(--dim);
+  padding: 7px 14px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  border: none;
+  transition: color 0.3s;
+}
+.lang-btn.active { color: var(--gold-hi); }
 
-/* Zakładki */
-.cat-tabs { display: flex; justify-content: center; background: var(--stone); border-bottom: 2px solid var(--gold); transition: border-color 0.3s; }
-.cat-btn { padding: 15px 25px; background: transparent; border: none; color: var(--text-dim); text-transform: uppercase; cursor: pointer; font-weight: bold; font-size: 0.85rem; }
-.cat-btn.active { color: #000; background: var(--gold); }
 
-.body-wrap { display:flex; flex:1; }
 
-/* Sidebar */
-.sidebar { width: 280px; background: rgba(10,10,10,0.95); border-right: 2px solid var(--iron); padding: 20px 0; }
-.sidebar-label { padding: 0 15px 10px; font-size: 0.75rem; color: var(--gold); border-bottom: 1px solid var(--iron); margin-bottom: 10px; text-transform: uppercase; }
-.lord-btn { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 15px; background: transparent; border: none; border-left: 4px solid transparent; cursor: pointer; text-align: left; color: inherit; }
-.lord-btn:hover { background: rgba(255,255,255,0.05); }
-.lord-btn.on { background: rgba(166, 124, 0, 0.2); border-left-color: var(--gold); }
+.site-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  transition: color 0.4s;
+}
+.site-subtitle {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  color: var(--dim);
+  font-size: 0.95rem;
+  margin-top: 6px;
+  letter-spacing: 1px;
+  transition: color 0.4s;
+}
 
-/* Avatars */
-.avatar-box { width: 50px; height: 50px; background: #000; display: grid; place-items: center; overflow: hidden; }
+/* ══════════════════════════════════════
+   ZAKŁADKI
+══════════════════════════════════════ */
+.cat-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 12px;
+  background: rgba(0,0,0,0.7);
+  border-bottom: none;
+  margin: 0 12px;
+}
+.cat-btn {
+  padding: 12px 28px;
+  background: transparent;
+  border: none;
+  color: var(--dim);
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  position: relative;
+  transition: color 0.3s;
+}
+.cat-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%; right: 50%;
+  height: 2px;
+  background: var(--gold);
+  transition: left 0.3s, right 0.3s, background 0.4s;
+}
+.cat-btn.active { color: var(--gold-hi); }
+.cat-btn.active::after { left: 0; right: 0; }
+
+/* ══════════════════════════════════════
+   BODY
+══════════════════════════════════════ */
+.body-wrap {
+  display: flex;
+  flex: 1;
+  padding: 12px;
+  gap: 12px;
+}
+
+/* ══════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════ */
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: rgba(5,5,5,0.95);
+  padding: 16px 0;
+  position: relative;
+}
+
+.sidebar-label {
+  padding: 0 14px 10px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  border-bottom: 1px solid var(--iron);
+  margin-bottom: 10px;
+  transition: color 0.4s;
+}
+
+.lord-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  transition: background 0.2s, border-color 0.3s;
+  font-family: 'EB Garamond', serif;
+}
+.lord-btn:hover { background: rgba(255,255,255,0.04); }
+.lord-btn.on {
+  background: rgba(166,124,0,0.12);
+  border-left-color: var(--gold);
+}
+
+/* Avatary */
+.avatar-box {
+  width: 44px; height: 44px;
+  background: #000;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  position: relative;
+}
 .avatar-box.has-img { border: 1px solid var(--iron); }
 .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
 
-.main { flex:1; padding: 40px; }
-.card-head { display: flex; gap: 30px; margin-bottom: 30px; border-bottom: 2px solid var(--iron); padding-bottom: 20px; align-items: center; }
-.portrait-large { width: 150px; height: 180px; background: #000; display: grid; place-items: center; font-size: 4rem; overflow: hidden; }
-.portrait-large.has-img { border: 3px solid var(--gold); }
+.lord-name { font-size: 0.95rem; color: var(--parchment); }
+
+/* ══════════════════════════════════════
+   MAIN
+══════════════════════════════════════ */
+.main {
+  flex: 1;
+  background: rgba(8,8,8,0.95);
+  padding: 32px;
+  position: relative;
+  min-height: 400px;
+}
+
+/* Karta lorda - góra */
+.card-head {
+  display: flex;
+  gap: 28px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  align-items: flex-start;
+}
+
+.portrait-large {
+  width: 140px;
+  height: 168px;
+  background: #000;
+  display: grid;
+  place-items: center;
+  font-size: 3.5rem;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+}
 .portrait-large img { width: 100%; height: 100%; object-fit: cover; }
 
-.title-area h2 { font-size: 2.2rem; color: var(--gold-hi); margin-bottom: 5px; }
-.tags-row { display: flex; flex-wrap: wrap; gap: 8px; }
-.tag { background: #222; border: 1px solid var(--gold); color: var(--gold); padding: 2px 10px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+.title-area { flex: 1; }
+.lord-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  color: var(--gold-hi);
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  transition: color 0.4s;
+}
+.tags-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+.tag {
+  background: #111;
+  color: var(--gold);
+  padding: 3px 12px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  position: relative;
+  transition: color 0.4s;
+}
 
-.description { font-size: 1.1rem; line-height: 1.6; font-style: italic; color: #ccc; margin-bottom: 30px; }
-.section-label { color: var(--gold); border-bottom: 1px solid var(--iron); margin-bottom: 15px; padding-bottom: 5px; text-transform: uppercase; margin-top: 20px; font-weight: bold; font-size: 0.85rem; }
+/* Sekcja */
+.section-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+  padding-bottom: 6px;
+  margin-bottom: 14px;
+  margin-top: 24px;
+  position: relative;
+  transition: color 0.4s;
+}
+.section-label::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  transition: background 0.4s;
+}
+
+/* Opis */
+.description {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  font-style: italic;
+  color: #bbb;
+  margin-bottom: 20px;
+}
 
 /* Galeria */
-.castle-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-.gallery-img { width: 100%; height: 200px; border: 2px solid var(--iron); object-fit: cover; transition: 0.2s; cursor: zoom-in; }
-.gallery-img:hover { border-color: var(--gold-hi); transform: scale(1.02); }
+.castle-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.gallery-img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  cursor: zoom-in;
+  display: block;
+  position: relative;
+  transition: transform 0.2s;
+}
+.gallery-img-wrap {
+  position: relative;
+  overflow: hidden;
+}
+.gallery-img:hover { transform: scale(1.03); }
 
 /* Download */
-.dl-section { margin-top: 40px; padding: 25px; background: rgba(0,0,0,0.5); border: 2px solid var(--iron); }
-.btn-dl { display: inline-block; background: var(--gold); color: #000; padding: 12px 25px; text-decoration: none; font-weight: bold; margin-bottom: 20px; text-transform: uppercase; }
-.install-path { font-size: 0.9rem; color: var(--text-dim); font-family: 'Courier New', monospace; background: #000; padding: 15px; border-left: 4px solid var(--fire); }
+.dl-section {
+  margin-top: 32px;
+  padding: 24px;
+  background: rgba(0,0,0,0.6);
+  position: relative;
+}
+.btn-dl {
+  display: inline-block;
+  background: var(--gold);
+  color: #000;
+  padding: 11px 26px;
+  text-decoration: none;
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  transition: background 0.3s;
+  position: relative;
+}
+.btn-dl:hover { background: var(--gold-hi); }
 
-/* Modal Lightbox */
-#modal-overlay { 
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); 
-  z-index: 1000; cursor: zoom-out; place-items: center; padding: 20px; 
+.install-path {
+  font-size: 0.82rem;
+  color: var(--dim);
+  font-family: 'Courier New', monospace;
+  background: #000;
+  padding: 12px 16px;
+  border-left: 3px solid var(--fire);
+  line-height: 1.6;
+}
+.install-path code { color: var(--parchment); }
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 300px;
+  gap: 16px;
+  opacity: 0.4;
+}
+.empty-crest { font-size: 4rem; }
+.empty-text {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+/* ══════════════════════════════════════
+   LIGHTBOX
+══════════════════════════════════════ */
+#modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.93);
+  z-index: 1000;
+  cursor: zoom-out;
+  place-items: center;
+  padding: 20px;
 }
 #modal-overlay.open { display: grid; }
-#modal-img { max-width: 90%; max-height: 90%; border: 4px solid var(--gold); box-shadow: 0 0 50px rgba(0,0,0,1); }
+#modal-img {
+  max-width: 90%;
+  max-height: 90%;
+  position: relative;
+}
 
-.empty-state { text-align: center; margin-top: 100px; opacity: 0.5; font-size: 1.5rem; }
-
-@media (max-width: 800px) { .body-wrap { flex-direction: column; } .sidebar { width: 100%; } }
+/* ══════════════════════════════════════
+   RESPONSYWNOŚĆ
+══════════════════════════════════════ */
+@media (max-width: 800px) {
+  .body-wrap { flex-direction: column; padding: 8px; }
+  .sidebar { width: 100%; }
+  .color-picker-wrap { display: none; }
+  .main { padding: 20px; }
+}
 </style>
 </head>
 <body>
 
-<div class="bg-fix"></div>
 <canvas id="dust"></canvas>
 
 <div id="modal-overlay" onclick="closeModal()">
-    <img id="modal-img" src="" alt="Powiększenie">
+  <div class="framed" style="display:inline-block">
+    <img id="modal-img" src="" alt="">
+  </div>
 </div>
 
 <div class="page">
-  <header class="site-header">
+
+  <!-- HEADER -->
+  <header class="site-header framed">
+
     <div class="lang-switch">
-        <button class="lang-btn" id="btn-pl" onclick="setLang('pl')">PL</button>
-        <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn framed-sm" id="btn-pl" onclick="setLang('pl')">PL</button>
+      <button class="lang-btn framed-sm" id="btn-en" onclick="setLang('en')">EN</button>
     </div>
-    <h1>Mejker's Ai lord Files</h1>
+    <div class="site-title">Mejker's Ai Lord Files</div>
+    <div class="site-subtitle">Stronghold Custom AI Lords</div>
   </header>
-  <nav class="cat-tabs" id="cat-tabs-ui"></nav>
+
+  <!-- ZAKŁADKI -->
+  <nav class="cat-tabs framed" id="cat-tabs-ui"></nav>
+
   <div class="body-wrap">
-    <aside class="sidebar">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar framed">
       <div class="sidebar-label" id="sidebar-lbl"></div>
       <div id="sidebar-list"></div>
     </aside>
-    <main class="main" id="main-panel"></main>
+
+    <!-- MAIN -->
+    <main class="main framed" id="main-panel"></main>
+
   </div>
 </div>
 
 <script>
-/* --- DANE --- */
+/* ══════════════════════════════════
+   DANE
+══════════════════════════════════ */
 const CATEGORIES = [
-    { id: "all", pl: "Wszystkie", en: "All", theme: "#a67c00", hi: "#ffcc33" },
-    { id: "t2",  pl: "Twierdza 2", en: "Stronghold 2", theme: "#d4af37", hi: "#f9e076" },
-    { id: "t1",  pl: "Twierdza 1", en: "Stronghold 1", theme: "#7c0000", hi: "#ff4444" } // Przykład innej zakładki
+  { id:"all", pl:"Wszystkie",  en:"All",         theme:"#a67c00", hi:"#ffcc33" },
+  { id:"t2",  pl:"Twierdza 2", en:"Stronghold 2", theme:"#d4af37", hi:"#f9e076" },
+  { id:"t1",  pl:"Twierdza 1", en:"Stronghold 1", theme:"#7c0000", hi:"#ff4444" }
 ];
 
 const LORDS = [
   {
-    id: "Olaf Grimtooth",
+    id: "olaf",
     category: "t2",
     name: "Olaf Grimtooth",
     icon: "🪓",
-    avatar: "Avatarog.png", 
-    tags_pl: ["Agresywny", "Wiking", "2 Zamki"],
-    tags_en: ["Aggressive", "Viking", "2 Castles"],
+    avatar: "Avatarog.png",
+    tags_pl: ["Agresywny","Wiking","2 Zamki"],
+    tags_en: ["Aggressive","Viking","2 Castles"],
     desc_pl: "Olaf to AI o przeciętnym poziomie trudności, jednak nie należy go lekceważyć. Posiada dwa zamki, mocno inspirowane tymi, które budował w Twierdzy 2.",
-    desc_en: "Olaf is an AI with an average level of difficulty, but he should not be underestimated.",
-    castle_imgs: ["olaf1.png", "olaf2.png"],
+    desc_en: "Olaf is an AI with an average level of difficulty, but he should not be underestimated. He has two castles, heavily inspired by those he built in Stronghold 2.",
+    castle_imgs: ["olaf1.png","olaf2.png"],
     media_pl: "https://github.com/al4n-commits/Boty-Twierdza-2-w-krzy-owcu./raw/refs/heads/main/Olaf%20Grimtooth.rar",
     media_en: "#"
   },
@@ -144,101 +515,217 @@ const LORDS = [
     id: "edwin",
     category: "t2",
     name: "Edwin Blackfly",
-    icon: "??",
-    avatar: "avatarse.png", 
-    tags_pl: ["Słaby", "Tchórz", "3 Zamki"],
-    tags_en: ["Weak", "Coward", "3 Castles"],
+    icon: "🕷",
+    avatar: "avatarse.png",
+    tags_pl: ["Słaby","Tchórz","3 Zamki"],
+    tags_en: ["Weak","Coward","3 Castles"],
     desc_pl: "Edwin to dość niezdarny lord, jednak im dłużej pozostaje w grze, tym częściej wysyła swoje oddziały.",
     desc_en: "Edwin is a rather clumsy lord, but the longer he stays in the game, the more frequently he sends out his troops.",
-    castle_imgs: ["edwin1.jpg", "edwin2.jpg", "edwin3.jpg"],
-    media_pl: "https://github.com/al4n-commits/Boty-Twierdza-2-w-krzy-owcu./raw/refs/heads/main/Sir%20Edwin.rar", 
+    castle_imgs: ["edwin1.jpg","edwin2.jpg","edwin3.jpg"],
+    media_pl: "https://github.com/al4n-commits/Boty-Twierdza-2-w-krzy-owcu./raw/refs/heads/main/Sir%20Edwin.rar",
     media_en: "#"
   }
 ];
 
 const UI = {
-    pl: { sidebar: "Dostępni Lordowie", empty: "Wybierz lorda z listy", history: "Historia / Taktyka", variants: "Warianty Zamków", download: "Pobierz Media", btn_media: "POBIERZ PACZKĘ PL", no_file: "Plik niedostępny", install: "Instrukcja: Wypakuj do:" },
-    en: { sidebar: "Available Lords", empty: "Select a lord", history: "History / Tactics", variants: "Castle Variants", download: "Download Media", btn_media: "DOWNLOAD ENG PACK", no_file: "File not available", install: "Guide: Extract to:" }
+  pl: {
+    sidebar: "Dostępni Lordowie",
+    empty: "Wybierz lorda z listy",
+    history: "Historia & Taktyka",
+    variants: "Warianty Zamków",
+    download: "Pobierz Plik",
+    btn_media: "POBIERZ PACZKĘ PL",
+    no_file: "Plik niedostępny",
+    install: "Wypakuj do folderu:"
+  },
+  en: {
+    sidebar: "Available Lords",
+    empty: "Select a lord",
+    history: "History & Tactics",
+    variants: "Castle Variants",
+    download: "Download File",
+    btn_media: "DOWNLOAD ENG PACK",
+    no_file: "File not available",
+    install: "Extract to folder:"
+  }
 };
 
-/* --- LOGIKA --- */
-let lang = 'pl'; let currentCat = 'all'; let activeLordId = null;
+/* ══════════════════════════════════
+   STAN
+══════════════════════════════════ */
+let lang = 'pl';
+let currentCat = 'all';
+let activeLordId = null;
 
+/* ══════════════════════════════════
+   JĘZYK / KATEGORIA
+══════════════════════════════════ */
 function setLang(l) { lang = l; refreshUI(); }
 
-function filterCat(catId) { 
-    currentCat = catId; 
-    // Zmiana kolorów na podstawie kategorii
-    const cat = CATEGORIES.find(c => c.id === catId);
-    if(cat) {
-        document.documentElement.style.setProperty('--gold', cat.theme);
-        document.documentElement.style.setProperty('--gold-hi', cat.hi);
-    }
-    refreshUI(); 
+function applyTheme(base, hi) {
+  const root = document.documentElement;
+  root.style.setProperty('--gold', base);
+  root.style.setProperty('--gold-hi', hi);
+  root.style.setProperty('--frame-outer', base);
+  root.style.setProperty('--frame-inner', hexAlpha(base, 0.35));
+  root.style.setProperty('--frame-glow',  hexAlpha(base, 0.12));
 }
 
+function hexAlpha(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function filterCat(catId) {
+  currentCat = catId;
+  const cat = CATEGORIES.find(c => c.id === catId);
+  if (cat) applyTheme(cat.theme, cat.hi);
+  refreshUI();
+}
+
+/* ══════════════════════════════════
+   RENDER
+══════════════════════════════════ */
 function refreshUI() {
-    document.getElementById('btn-pl').classList.toggle('active', lang === 'pl');
-    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-    const catTabs = document.getElementById('cat-tabs-ui');
-    catTabs.innerHTML = CATEGORIES.map(c => `<button class="cat-btn ${currentCat===c.id?'active':''}" onclick="filterCat('${c.id}')">${lang==='pl'?c.pl:c.en}</button>`).join('');
-    document.getElementById('sidebar-lbl').innerText = UI[lang].sidebar;
-    renderSidebar();
-    if(activeLordId) showLord(activeLordId); else renderEmpty();
+  document.getElementById('btn-pl').classList.toggle('active', lang==='pl');
+  document.getElementById('btn-en').classList.toggle('active', lang==='en');
+
+  const tabs = document.getElementById('cat-tabs-ui');
+  tabs.innerHTML = CATEGORIES.map(c =>
+    `<button class="cat-btn ${currentCat===c.id?'active':''}" onclick="filterCat('${c.id}')">${lang==='pl'?c.pl:c.en}</button>`
+  ).join('');
+
+  document.getElementById('sidebar-lbl').innerText = UI[lang].sidebar;
+  renderSidebar();
+  activeLordId ? showLord(activeLordId) : renderEmpty();
 }
 
 function renderEmpty() {
-    document.getElementById('main-panel').innerHTML = `<div class="empty-state"><h2>${UI[lang].empty}</h2></div>`;
+  document.getElementById('main-panel').innerHTML = `
+    <div class="empty-state">
+      <div class="empty-crest">⚔</div>
+      <div class="empty-text">${UI[lang].empty}</div>
+    </div>`;
 }
 
 function renderSidebar() {
-    const list = document.getElementById('sidebar-list');
-    const filtered = LORDS.filter(l => currentCat === 'all' || l.category === currentCat);
-    list.innerHTML = filtered.map(l => {
-        const hasImg = l.avatar && l.avatar !== "";
-        return `<button class="lord-btn ${activeLordId === l.id ? 'on' : ''}" onclick="showLord('${l.id}')">
-            <div class="avatar-box ${hasImg?'has-img':''}">${hasImg ? `<img src="${l.avatar}">` : l.icon}</div>
-            <div class="lord-btn-name">${l.name}</div>
-        </button>`;
-    }).join('');
+  const list = document.getElementById('sidebar-list');
+  const filtered = LORDS.filter(l => currentCat==='all' || l.category===currentCat);
+  list.innerHTML = filtered.map(l => {
+    const hasImg = l.avatar && l.avatar !== "";
+    return `<button class="lord-btn ${activeLordId===l.id?'on':''}" onclick="showLord('${l.id}')">
+      <div class="avatar-box ${hasImg?'has-img':''}">${hasImg ? `<img src="${l.avatar}" onerror="this.parentNode.innerHTML='${l.icon}'">` : l.icon}</div>
+      <span class="lord-name">${l.name}</span>
+    </button>`;
+  }).join('');
 }
 
 function showLord(id) {
-    activeLordId = id; const l = LORDS.find(x => x.id === id); const t = UI[lang];
-    const currentLink = lang === 'pl' ? l.media_pl : l.media_en;
-    const hasPortrait = l.avatar && l.avatar !== "";
-    renderSidebar();
-    document.getElementById('main-panel').innerHTML = `
-        <div class="card-head"><div class="portrait-large ${hasPortrait?'has-img':''}">${hasPortrait ? `<img src="${l.avatar}">` : l.icon}</div>
-        <div class="title-area"><h2>${l.name}</h2><div class="tags-row">${(lang==='pl'?l.tags_pl:l.tags_en).map(tag => `<span class="tag">${tag}</span>`).join('')}</div></div></div>
-        <div class="section-label">${t.history}</div><p class="description">${lang==='pl'?l.desc_pl:l.desc_en}</p>
-        <div class="section-label">${t.variants} (${l.castle_imgs.length})</div>
-        <div class="castle-gallery">${l.castle_imgs.map(img => `<img src="${img}" class="gallery-img" onclick="openModal('${img}')">`).join('')}</div>
-        <div class="dl-section"><div class="section-label">${t.download}</div>${(currentLink && currentLink !== '#') ? `<a href="${currentLink}" class="btn-dl">${t.btn_media}</a>` : `<span style="color:var(--fire)">${t.no_file}</span>`}
-        <div class="install-path"><strong>${t.install}</strong><br><code>AppData\\LocalLow\\Firefly Studios\\Stronghold Crusader Definitive Edition\\CustomMedia</code></div></div>`;
+  activeLordId = id;
+  const l = LORDS.find(x => x.id===id);
+  const t = UI[lang];
+  const link = lang==='pl' ? l.media_pl : l.media_en;
+  const hasPortrait = l.avatar && l.avatar !== "";
+
+  renderSidebar();
+
+  const gallery = l.castle_imgs.map(img => `
+    <div class="gallery-img-wrap framed-sm">
+      <img src="${img}" class="gallery-img" onclick="openModal('${img}')" onerror="this.style.display='none'">
+    </div>`).join('');
+
+  const dlBtn = (link && link !== '#')
+    ? `<a href="${link}" class="btn-dl framed-sm">${t.btn_media}</a>`
+    : `<span style="color:var(--fire);font-family:'Cinzel',serif;font-size:0.8rem">${t.no_file}</span>`;
+
+  document.getElementById('main-panel').innerHTML = `
+    <div class="card-head">
+      <div class="portrait-large framed">${hasPortrait ? `<img src="${l.avatar}" onerror="this.parentNode.innerHTML='${l.icon}'">` : l.icon}</div>
+      <div class="title-area">
+        <div class="lord-title">${l.name}</div>
+        <div class="tags-row">${(lang==='pl'?l.tags_pl:l.tags_en).map(tag=>`<span class="tag framed-sm">${tag}</span>`).join('')}</div>
+      </div>
+    </div>
+
+    <div class="section-label">${t.history}</div>
+    <p class="description">${lang==='pl'?l.desc_pl:l.desc_en}</p>
+
+    <div class="section-label">${t.variants} (${l.castle_imgs.length})</div>
+    <div class="castle-gallery">${gallery}</div>
+
+    <div class="dl-section framed">
+      <div class="section-label">${t.download}</div>
+      ${dlBtn}
+      <div class="install-path">
+        <strong style="color:var(--gold)">${t.install}</strong><br>
+        <code>AppData\\LocalLow\\Firefly Studios\\Stronghold Crusader Definitive Edition\\CustomMedia</code>
+      </div>
+    </div>`;
 }
 
-/* MODAL LOGIC */
+/* ══════════════════════════════════
+   LIGHTBOX
+══════════════════════════════════ */
 function openModal(src) {
-    const modal = document.getElementById('modal-overlay');
-    const modalImg = document.getElementById('modal-img');
-    modalImg.src = src;
-    modal.classList.add('open');
+  document.getElementById('modal-img').src = src;
+  document.getElementById('modal-overlay').classList.add('open');
 }
 function closeModal() {
-    document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('modal-overlay').classList.remove('open');
 }
 
-setLang('pl');
+/* ══════════════════════════════════
+   INICJALIZACJA
+══════════════════════════════════ */
+refreshUI();
 
-/* --- FIRE ASH --- */
+/* ══════════════════════════════════
+   POPIOŁY / OGIEŃ
+══════════════════════════════════ */
 (function(){
-    const canvas = document.getElementById('dust'); const ctx = canvas.getContext('2d'); let w, h, particles = [];
-    function init() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
-    class Ash { constructor() { this.reset(); } reset() { this.x = Math.random() * w; this.y = h + 20; this.size = Math.random() * 3 + 1; this.vy = -(Math.random() * 2 + 0.8); this.vx = (Math.random() - 0.5) * 2; this.alpha = Math.random() * 0.7 + 0.3; this.color = Math.random() > 0.5 ? '#ff4500' : '#ff8c00'; } update() { this.y += this.vy; this.x += this.vx; this.alpha -= 0.002; if (this.alpha <= 0 || this.y < -20) this.reset(); } draw() { ctx.globalAlpha = this.alpha; ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, this.size, this.size); } }
-    for(let i=0; i<80; i++) particles.push(new Ash());
-    function loop() { ctx.clearRect(0,0,w,h); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(loop); }
-    window.addEventListener('resize', init); init(); loop();
+  const canvas = document.getElementById('dust');
+  const ctx = canvas.getContext('2d');
+  let w, h, particles = [];
+
+  function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+
+  class Ash {
+    constructor() { this.reset(true); }
+    reset(init) {
+      this.x = Math.random() * w;
+      this.y = init ? Math.random() * h : h + 20;
+      this.size = Math.random() * 2.5 + 0.5;
+      this.vy = -(Math.random() * 1.5 + 0.5);
+      this.vx = (Math.random() - 0.5) * 1.2;
+      this.alpha = Math.random() * 0.5 + 0.15;
+      this.color = Math.random() > 0.5 ? '#ff4500' : '#ff8c00';
+    }
+    update() {
+      this.y += this.vy;
+      this.x += this.vx;
+      this.alpha -= 0.0015;
+      if (this.alpha <= 0 || this.y < -20) this.reset(false);
+    }
+    draw() {
+      ctx.globalAlpha = this.alpha;
+      ctx.fillStyle = this.color;
+      ctx.fillRect(this.x, this.y, this.size, this.size);
+    }
+  }
+
+  for (let i = 0; i < 100; i++) particles.push(new Ash());
+
+  function loop() {
+    ctx.clearRect(0, 0, w, h);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  loop();
 })();
 </script>
 </body>
