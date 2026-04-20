@@ -31,7 +31,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Blokada scrolla przy otwartym obrazku */
 body.modal-open { overflow: hidden; }
 
 /* SYSTEM RAMEK */
@@ -56,7 +55,6 @@ body.modal-open { overflow: hidden; }
 }
 
 #dust { position:fixed; inset:0; z-index:1; pointer-events:none; }
-
 .page { position:relative; z-index:2; display:flex; flex-direction:column; min-height:100vh; }
 
 /* HEADER */
@@ -113,7 +111,7 @@ body.modal-open { overflow: hidden; }
 
 .description { font-size: 1.15rem; line-height: 1.8; color: #ccc; margin-bottom: 30px; }
 
-/* GALERIA - NAPRAWIONA */
+/* GALERIA */
 .castle-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
 .gallery-img-wrap { width: 100%; height: 200px; overflow: hidden; background: #000; cursor: zoom-in; }
 .gallery-img { width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }
@@ -124,7 +122,11 @@ body.modal-open { overflow: hidden; }
 .btn-dl:hover { background: var(--gold-hi); transform: translateY(-2px); }
 .install-path { margin-top: 20px; font-size: 0.85rem; color: var(--dim); font-family: monospace; background: #000; padding: 15px; border-left: 4px solid var(--fire); }
 
-/* MODAL / LIGHTBOX - NAPRAWIONY */
+/* PUSTY STAN */
+.empty-msg { text-align: center; padding-top: 100px; opacity: 0.6; }
+.empty-msg h2 { font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 10px; }
+
+/* MODAL */
 #modal-overlay {
   display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
   z-index: 9999; cursor: zoom-out; place-items: center; padding: 40px;
@@ -205,8 +207,30 @@ const LORDS = [
 ];
 
 const UI = {
-  pl: { subtitle: "Twierdza: Własne Postacie AI", sidebar: "Dostępni Lordowie", history: "Historia & Taktyka", variants: "Warianty Zamków", download: "Pobierz Plik", btn_media: "POBIERZ PACZKĘ PL", no_file: "Plik niedostępny", install: "Wypakuj do folderu:" },
-  en: { subtitle: "Stronghold: Custom AI Lords", sidebar: "Available Lords", history: "History & Tactics", variants: "Castle Variants", download: "Download File", btn_media: "DOWNLOAD ENG PACK", no_file: "File not available", install: "Extract to folder:" }
+  pl: { 
+    subtitle: "Twierdza: Własne Postacie AI", 
+    sidebar: "Dostępni Lordowie", 
+    history: "Historia & Taktyka", 
+    variants: "Warianty Zamków", 
+    download: "Pobierz Plik", 
+    btn_media: "POBIERZ PACZKĘ PL", 
+    no_file: "Plik niedostępny", 
+    install: "Wypakuj do folderu:",
+    empty_cat: "Ta kategoria jest obecnie pusta",
+    empty_sub: "Lordowie wkrótce przybędą..."
+  },
+  en: { 
+    subtitle: "Stronghold: Custom AI Lords", 
+    sidebar: "Available Lords", 
+    history: "History & Tactics", 
+    variants: "Castle Variants", 
+    download: "Download File", 
+    btn_media: "DOWNLOAD ENG PACK", 
+    no_file: "File not available", 
+    install: "Extract to folder:",
+    empty_cat: "This category is currently empty",
+    empty_sub: "Lords will arrive soon..."
+  }
 };
 
 let lang = 'pl';
@@ -232,8 +256,17 @@ function refreshUI() {
   ).join('');
 
   const filtered = LORDS.filter(l => currentCat==='all' || l.category===currentCat);
-  if (!activeLordId && filtered.length > 0) activeLordId = filtered[0].id;
   
+  // LOGIKA ZAZNACZANIA PIERWSZEGO LORDA
+  if (filtered.length > 0) {
+    // Jeśli obecny aktywny lord nie jest w nowym filtrze, wybierz pierwszego z brzegu
+    if (!filtered.find(l => l.id === activeLordId)) {
+        activeLordId = filtered[0].id;
+    }
+  } else {
+    activeLordId = null;
+  }
+
   const list = document.getElementById('sidebar-list');
   list.innerHTML = filtered.map(l => `
     <button class="lord-btn ${activeLordId===l.id?'on':''}" onclick="showLord('${l.id}')">
@@ -241,7 +274,11 @@ function refreshUI() {
       <span>${l.name}</span>
     </button>`).join('');
 
-  if (activeLordId) showLord(activeLordId);
+  if (activeLordId) {
+    showLord(activeLordId);
+  } else {
+    renderEmpty();
+  }
 }
 
 function filterCat(id) {
@@ -252,6 +289,16 @@ function filterCat(id) {
   refreshUI();
 }
 
+function renderEmpty() {
+    const t = UI[lang];
+    document.getElementById('main-panel').innerHTML = `
+        <div class="empty-msg">
+            <h2>${t.empty_cat}</h2>
+            <p>${t.empty_sub}</p>
+        </div>
+    `;
+}
+
 function showLord(id) {
   activeLordId = id;
   const l = LORDS.find(x => x.id === id);
@@ -259,6 +306,11 @@ function showLord(id) {
   const link = lang === 'pl' ? l.media_pl : l.media_en;
 
   document.querySelectorAll('.lord-btn').forEach(b => b.classList.remove('on'));
+  // Dodanie klasy "on" do przycisku w sidebarze
+  const btns = document.querySelectorAll('.lord-btn');
+  btns.forEach(b => {
+    if(b.getAttribute('onclick').includes(id)) b.classList.add('on');
+  });
 
   const gallery = l.castle_imgs.map(img => `
     <div class="gallery-img-wrap framed-sm" onclick="openModal('${img}')">
