@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mejker's Ai Lord Files</title>
 <link rel="icon" type="image/png" href="icon.png">
-<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:      #0a0a0a;
@@ -17,9 +17,8 @@
   --parchment: #d4c4a8;
   --dim:     #666;
   --frame-outer: var(--gold);
-  --frame-mid:   #111;
-  --frame-inner: color-mix(in srgb, var(--gold) 35%, transparent);
-  --frame-glow:  color-mix(in srgb, var(--gold) 12%, transparent);
+  --frame-inner: rgba(166, 124, 0, 0.3);
+  --frame-glow:  rgba(166, 124, 0, 0.15);
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -32,6 +31,9 @@ body {
   overflow-x: hidden;
 }
 
+/* Blokada scrolla przy otwartym obrazku */
+body.modal-open { overflow: hidden; }
+
 /* SYSTEM RAMEK */
 .framed { position: relative; }
 .framed::before {
@@ -40,86 +42,98 @@ body {
 }
 .framed::after {
   content: ''; position: absolute; inset: 6px; border: 1px solid var(--frame-inner);
-  pointer-events: none; z-index: 2; transition: border-color 0.4s, box-shadow 0.4s;
+  pointer-events: none; z-index: 2; transition: border-color 0.4s;
   box-shadow: 0 0 8px var(--frame-glow);
 }
+.framed-sm { position: relative; }
 .framed-sm::before {
   content: ''; position: absolute; inset: 0; border: 2px solid var(--frame-outer);
-  pointer-events: none; z-index: 2; transition: border-color 0.4s;
+  pointer-events: none; z-index: 2;
 }
 .framed-sm::after {
   content: ''; position: absolute; inset: 3px; border: 1px solid var(--frame-inner);
-  pointer-events: none; z-index: 2; transition: border-color 0.4s;
+  pointer-events: none; z-index: 2;
 }
-.framed:hover::before, .framed-sm:hover::before { border-color: var(--gold-hi); }
 
-#dust { position:fixed; inset:0; z-index:999; pointer-events:none; }
+#dust { position:fixed; inset:0; z-index:1; pointer-events:none; }
+
 .page { position:relative; z-index:2; display:flex; flex-direction:column; min-height:100vh; }
 
-.site-header { text-align: center; padding: 36px 20px 28px; background: rgba(0,0,0,0.9); position: relative; margin: 12px; }
-.lang-switch { position: absolute; top: 16px; right: 16px; display: flex; gap: 6px; }
+/* HEADER */
+.site-header { text-align: center; padding: 40px 20px; background: rgba(0,0,0,0.9); margin: 12px; }
+.lang-switch { position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; z-index: 10; }
 .lang-btn {
-  position: relative; background: #000; color: var(--dim); padding: 7px 14px;
-  cursor: pointer; font-family: 'Cinzel', serif; font-size: 0.75rem;
-  letter-spacing: 1px; border: none; transition: color 0.3s;
+  background: #000; color: var(--dim); padding: 8px 16px;
+  cursor: pointer; font-family: 'Cinzel', serif; font-size: 0.7rem;
+  border: none; transition: 0.3s;
 }
 .lang-btn.active { color: var(--gold-hi); }
 
-.site-title { font-family: 'Cinzel', serif; font-size: clamp(1.3rem, 3.5vw, 2.2rem); color: var(--gold); text-transform: uppercase; letter-spacing: 4px; }
-.site-subtitle { font-family: 'EB Garamond', serif; font-style: italic; color: var(--dim); font-size: 0.95rem; margin-top: 6px; }
+.site-title { font-family: 'Cinzel', serif; font-size: 2.2rem; color: var(--gold); text-transform: uppercase; letter-spacing: 4px; }
+.site-subtitle { font-style: italic; color: var(--dim); margin-top: 8px; }
 
-.cat-tabs { display: flex; justify-content: center; gap: 2px; padding: 0 12px; background: rgba(0,0,0,0.7); margin: 0 12px; }
+/* ZAKŁADKI */
+.cat-tabs { display: flex; justify-content: center; background: rgba(0,0,0,0.8); margin: 0 12px; }
 .cat-btn {
-  padding: 12px 28px; background: transparent; border: none; color: var(--dim);
+  padding: 15px 30px; background: transparent; border: none; color: var(--dim);
   text-transform: uppercase; cursor: pointer; font-family: 'Cinzel', serif;
-  font-size: 0.75rem; letter-spacing: 2px; position: relative; transition: color 0.3s;
-}
-.cat-btn::after {
-  content: ''; position: absolute; bottom: 0; left: 50%; right: 50%;
-  height: 2px; background: var(--gold); transition: left 0.3s, right 0.3s;
+  font-size: 0.8rem; letter-spacing: 2px; position: relative; transition: 0.3s;
 }
 .cat-btn.active { color: var(--gold-hi); }
-.cat-btn.active::after { left: 0; right: 0; }
+.cat-btn.active::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--gold);
+}
 
+/* CONTENT */
 .body-wrap { display: flex; flex: 1; padding: 12px; gap: 12px; }
-.sidebar { width: 260px; flex-shrink: 0; background: rgba(5,5,5,0.95); padding: 16px 0; position: relative; }
-.sidebar-label { padding: 0 14px 10px; font-family: 'Cinzel', serif; font-size: 0.65rem; color: var(--gold); text-transform: uppercase; border-bottom: 1px solid var(--iron); margin-bottom: 10px; }
+.sidebar { width: 280px; flex-shrink: 0; background: rgba(5,5,5,0.95); padding: 20px 0; }
+.sidebar-label { padding: 0 20px 10px; font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--gold); border-bottom: 1px solid var(--iron); margin-bottom: 15px; }
 
 .lord-btn {
-  width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  width: 100%; display: flex; align-items: center; gap: 15px; padding: 12px 20px;
   background: transparent; border: none; border-left: 3px solid transparent;
-  cursor: pointer; text-align: left; color: inherit; font-family: 'EB Garamond', serif;
+  cursor: pointer; text-align: left; color: inherit; transition: 0.2s;
 }
-.lord-btn:hover { background: rgba(255,255,255,0.04); }
-.lord-btn.on { background: rgba(166,124,0,0.12); border-left-color: var(--gold); }
+.lord-btn:hover { background: rgba(255,255,255,0.05); }
+.lord-btn.on { background: rgba(166,124,0,0.15); border-left-color: var(--gold); }
 
-.avatar-box { width: 44px; height: 44px; background: #000; display: grid; place-items: center; overflow: hidden; font-size: 1.4rem; flex-shrink: 0; position: relative; }
-.avatar-box.has-img { border: 1px solid var(--iron); }
+.avatar-box { width: 50px; height: 50px; background: #000; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--iron); }
 .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
 
-.main { flex: 1; background: rgba(8,8,8,0.95); padding: 32px; position: relative; min-height: 400px; }
-.card-head { display: flex; gap: 28px; margin-bottom: 28px; padding-bottom: 20px; align-items: flex-start; }
-.portrait-large { width: 140px; height: 168px; background: #000; display: grid; place-items: center; font-size: 3.5rem; overflow: hidden; flex-shrink: 0; position: relative; }
+.main { flex: 1; background: rgba(8,8,8,0.95); padding: 40px; min-height: 500px; }
+.card-head { display: flex; gap: 30px; margin-bottom: 30px; border-bottom: 1px solid var(--iron); padding-bottom: 30px; }
+.portrait-large { width: 160px; height: 190px; background: #000; display: grid; place-items: center; font-size: 4rem; overflow: hidden; }
 .portrait-large img { width: 100%; height: 100%; object-fit: cover; }
-.lord-title { font-family: 'Cinzel', serif; font-size: clamp(1.4rem, 3vw, 2rem); color: var(--gold-hi); margin-bottom: 10px; }
-.tag { background: #111; color: var(--gold); padding: 3px 12px; font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; margin-right: 5px; }
+.lord-title { font-family: 'Cinzel', serif; font-size: 2.5rem; color: var(--gold-hi); margin-bottom: 10px; }
 
-.section-label { font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; padding-bottom: 6px; margin-bottom: 14px; margin-top: 24px; position: relative; }
-.section-label::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, var(--gold), transparent); }
-.description { font-size: 1.1rem; line-height: 1.7; font-style: italic; color: #bbb; margin-bottom: 20px; }
-.castle-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
-.gallery-img { width: 100%; height: 190px; object-fit: cover; cursor: zoom-in; transition: transform 0.2s; }
-.gallery-img:hover { transform: scale(1.03); }
+.tag { background: #111; color: var(--gold); padding: 4px 12px; font-family: 'Cinzel', serif; font-size: 0.65rem; margin-right: 8px; }
 
-.dl-section { margin-top: 32px; padding: 24px; background: rgba(0,0,0,0.6); position: relative; }
-.btn-dl { display: inline-block; background: var(--gold); color: #000; padding: 11px 26px; text-decoration: none; font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 18px; }
-.install-path { font-size: 0.82rem; color: var(--dim); font-family: 'Courier New', monospace; background: #000; padding: 12px 16px; border-left: 3px solid var(--fire); }
+.section-label { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--gold); text-transform: uppercase; margin: 30px 0 15px; position: relative; }
+.section-label::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 100px; height: 1px; background: var(--gold); }
 
-#modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.93); z-index: 1000; cursor: zoom-out; place-items: center; padding: 20px; }
+.description { font-size: 1.15rem; line-height: 1.8; color: #ccc; margin-bottom: 30px; }
+
+/* GALERIA - NAPRAWIONA */
+.castle-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+.gallery-img-wrap { width: 100%; height: 200px; overflow: hidden; background: #000; cursor: zoom-in; }
+.gallery-img { width: 100%; height: 100%; object-fit: cover; transition: 0.4s; }
+.gallery-img:hover { transform: scale(1.05); }
+
+.dl-section { margin-top: 40px; padding: 30px; background: rgba(0,0,0,0.5); }
+.btn-dl { display: inline-block; background: var(--gold); color: #000; padding: 14px 30px; text-decoration: none; font-family: 'Cinzel', serif; font-weight: bold; transition: 0.3s; }
+.btn-dl:hover { background: var(--gold-hi); transform: translateY(-2px); }
+.install-path { margin-top: 20px; font-size: 0.85rem; color: var(--dim); font-family: monospace; background: #000; padding: 15px; border-left: 4px solid var(--fire); }
+
+/* MODAL / LIGHTBOX - NAPRAWIONY */
+#modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+  z-index: 9999; cursor: zoom-out; place-items: center; padding: 40px;
+  backdrop-filter: blur(8px);
+}
 #modal-overlay.open { display: grid; }
-#modal-img { max-width: 90%; max-height: 90%; }
+#modal-img { max-width: 95%; max-height: 90vh; border: 2px solid var(--gold); object-fit: contain; }
 
-@media (max-width: 800px) { .body-wrap { flex-direction: column; } .sidebar { width: 100%; } }
+@media (max-width: 900px) { .body-wrap { flex-direction: column; } .sidebar { width: 100%; } .card-head { flex-direction: column; align-items: center; text-align: center; } }
 </style>
 </head>
 <body>
@@ -127,9 +141,7 @@ body {
 <canvas id="dust"></canvas>
 
 <div id="modal-overlay" onclick="closeModal()">
-  <div class="framed" style="display:inline-block">
-    <img id="modal-img" src="" alt="">
-  </div>
+  <img id="modal-img" src="" alt="Castle View">
 </div>
 
 <div class="page">
@@ -139,14 +151,14 @@ body {
       <button class="lang-btn framed-sm" id="btn-en" onclick="setLang('en')">EN</button>
     </div>
     <div class="site-title">Mejker's Ai Lord Files</div>
-    <div class="site-subtitle" id="site-subtitle">Stronghold Custom AI Lords</div>
+    <div class="site-subtitle" id="site-subtitle">Twierdza: Własne Postacie AI</div>
   </header>
 
   <nav class="cat-tabs framed" id="cat-tabs-ui"></nav>
 
   <div class="body-wrap">
     <aside class="sidebar framed">
-      <div class="sidebar-label" id="sidebar-lbl"></div>
+      <div class="sidebar-label" id="sidebar-lbl">Dostępni Lordowie</div>
       <div id="sidebar-list"></div>
     </aside>
     <main class="main framed" id="main-panel"></main>
@@ -193,61 +205,18 @@ const LORDS = [
 ];
 
 const UI = {
-  pl: {
-    subtitle: "Twierdza: Własne Postacie AI",
-    sidebar: "Dostępni Lordowie",
-    history: "Historia & Taktyka",
-    variants: "Warianty Zamków",
-    download: "Pobierz Plik",
-    btn_media: "POBIERZ PACZKĘ PL",
-    no_file: "Plik niedostępny",
-    install: "Wypakuj do folderu:"
-  },
-  en: {
-    subtitle: "Stronghold: Custom AI Lords",
-    sidebar: "Available Lords",
-    history: "History & Tactics",
-    variants: "Castle Variants",
-    download: "Download File",
-    btn_media: "DOWNLOAD ENG PACK",
-    no_file: "File not available",
-    install: "Extract to folder:"
-  }
+  pl: { subtitle: "Twierdza: Własne Postacie AI", sidebar: "Dostępni Lordowie", history: "Historia & Taktyka", variants: "Warianty Zamków", download: "Pobierz Plik", btn_media: "POBIERZ PACZKĘ PL", no_file: "Plik niedostępny", install: "Wypakuj do folderu:" },
+  en: { subtitle: "Stronghold: Custom AI Lords", sidebar: "Available Lords", history: "History & Tactics", variants: "Castle Variants", download: "Download File", btn_media: "DOWNLOAD ENG PACK", no_file: "File not available", install: "Extract to folder:" }
 };
 
-/* STAN */
 let lang = 'pl';
 let currentCat = 'all';
 let activeLordId = null;
 
-/* LOGIKA JĘZYKA I URL */
 function setLang(l) {
   lang = l;
-  // Zmienia URL bez przeładowania (np. index.html?lang=en)
   const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?lang=' + l;
   window.history.pushState({path:newurl}, '', newurl);
-  refreshUI();
-}
-
-function checkUrlLang() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const langParam = urlParams.get('lang');
-  if (langParam === 'en' || langParam === 'pl') {
-    lang = langParam;
-  }
-}
-
-function applyTheme(base, hi) {
-  const root = document.documentElement;
-  root.style.setProperty('--gold', base);
-  root.style.setProperty('--gold-hi', hi);
-  root.style.setProperty('--frame-outer', base);
-}
-
-function filterCat(catId) {
-  currentCat = catId;
-  const cat = CATEGORIES.find(c => c.id === catId);
-  if (cat) applyTheme(cat.theme, cat.hi);
   refreshUI();
 }
 
@@ -265,90 +234,88 @@ function refreshUI() {
   const filtered = LORDS.filter(l => currentCat==='all' || l.category===currentCat);
   if (!activeLordId && filtered.length > 0) activeLordId = filtered[0].id;
   
-  renderSidebar(filtered);
+  const list = document.getElementById('sidebar-list');
+  list.innerHTML = filtered.map(l => `
+    <button class="lord-btn ${activeLordId===l.id?'on':''}" onclick="showLord('${l.id}')">
+      <div class="avatar-box">${l.avatar ? `<img src="${l.avatar}" onerror="this.src=''">` : l.icon}</div>
+      <span>${l.name}</span>
+    </button>`).join('');
+
   if (activeLordId) showLord(activeLordId);
 }
 
-function renderSidebar(filtered) {
-  const list = document.getElementById('sidebar-list');
-  list.innerHTML = filtered.map(l => {
-    const hasImg = l.avatar && l.avatar !== "";
-    return `<button class="lord-btn ${activeLordId===l.id?'on':''}" onclick="showLord('${l.id}')">
-      <div class="avatar-box ${hasImg?'has-img':''}">${hasImg ? `<img src="${l.avatar}" onerror="this.src=''">` : l.icon}</div>
-      <span class="lord-name">${l.name}</span>
-    </button>`;
-  }).join('');
+function filterCat(id) {
+  currentCat = id;
+  const c = CATEGORIES.find(x => x.id === id);
+  document.documentElement.style.setProperty('--gold', c.theme);
+  document.documentElement.style.setProperty('--gold-hi', c.hi);
+  refreshUI();
 }
 
 function showLord(id) {
   activeLordId = id;
-  const l = LORDS.find(x => x.id===id);
+  const l = LORDS.find(x => x.id === id);
   const t = UI[lang];
-  const link = lang==='pl' ? l.media_pl : l.media_en;
-  
-  // Odśwież zaznaczenie w sidebarze bez pełnego renderu
-  document.querySelectorAll('.lord-btn').forEach(btn => btn.classList.remove('on'));
-  const activeBtn = Array.from(document.querySelectorAll('.lord-name')).find(el => el.innerText === l.name);
-  if(activeBtn) activeBtn.parentElement.classList.add('on');
+  const link = lang === 'pl' ? l.media_pl : l.media_en;
+
+  document.querySelectorAll('.lord-btn').forEach(b => b.classList.remove('on'));
 
   const gallery = l.castle_imgs.map(img => `
-    <div class="gallery-img-wrap framed-sm">
-      <img src="${img}" class="gallery-img" onclick="openModal('${img}')">
+    <div class="gallery-img-wrap framed-sm" onclick="openModal('${img}')">
+      <img src="${img}" class="gallery-img">
     </div>`).join('');
-
-  const dlBtn = (link && link !== '#') 
-    ? `<a href="${link}" class="btn-dl framed-sm">${t.btn_media}</a>` 
-    : `<span style="color:var(--fire)">${t.no_file}</span>`;
 
   document.getElementById('main-panel').innerHTML = `
     <div class="card-head">
       <div class="portrait-large framed">${l.avatar ? `<img src="${l.avatar}">` : l.icon}</div>
-      <div class="title-area">
+      <div>
         <div class="lord-title">${l.name}</div>
-        <div class="tags-row">${(lang==='pl'?l.tags_pl:l.tags_en).map(tag=>`<span class="tag framed-sm">${tag}</span>`).join('')}</div>
+        <div>${(lang==='pl'?l.tags_pl:l.tags_en).map(tag=>`<span class="tag framed-sm">${tag}</span>`).join('')}</div>
       </div>
     </div>
     <div class="section-label">${t.history}</div>
     <p class="description">${lang==='pl'?l.desc_pl:l.desc_en}</p>
-    <div class="section-label">${t.variants} (${l.castle_imgs.length})</div>
+    <div class="section-label">${t.variants}</div>
     <div class="castle-gallery">${gallery}</div>
     <div class="dl-section framed">
       <div class="section-label">${t.download}</div>
-      ${dlBtn}
-      <div class="install-path">
-        <strong>${t.install}</strong><br>
-        <code>AppData\\LocalLow\\Firefly Studios\\Stronghold Crusader Definitive Edition\\CustomMedia</code>
-      </div>
+      <a href="${link}" class="btn-dl framed-sm">${t.btn_media}</a>
+      <div class="install-path"><strong>${t.install}</strong><br><code>AppData\\LocalLow\\Firefly Studios\\Stronghold Crusader Definitive Edition\\CustomMedia</code></div>
     </div>`;
 }
 
-function openModal(src) { document.getElementById('modal-img').src = src; document.getElementById('modal-overlay').classList.add('open'); }
-function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+function openModal(src) {
+  const m = document.getElementById('modal-overlay');
+  document.getElementById('modal-img').src = src;
+  m.classList.add('open');
+  document.body.classList.add('modal-open');
+}
 
-/* START */
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.classList.remove('modal-open');
+}
+
 window.onload = () => {
-  checkUrlLang();
+  const p = new URLSearchParams(window.location.search).get('lang');
+  if (p) lang = p;
   refreshUI();
 };
 
-/* EFEKT POPIOŁU */
+/* ASH EFFECT */
 (function(){
-  const canvas = document.getElementById('dust'); const ctx = canvas.getContext('2d');
-  let w, h, particles = [];
-  function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
-  class Ash {
+  const c = document.getElementById('dust'); const ctx = c.getContext('2d');
+  let w, h, p = [];
+  function res() { w = c.width = window.innerWidth; h = c.height = window.innerHeight; }
+  class Particle {
     constructor() { this.reset(true); }
-    reset(init) {
-      this.x = Math.random() * w; this.y = init ? Math.random() * h : h + 20;
-      this.size = Math.random() * 2; this.vy = -(Math.random() * 1 + 0.5);
-      this.alpha = Math.random() * 0.5; this.color = Math.random() > 0.5 ? '#ff4500' : '#ff8c00';
-    }
-    update() { this.y += this.vy; this.alpha -= 0.001; if (this.alpha <= 0 || this.y < -20) this.reset(false); }
-    draw() { ctx.globalAlpha = this.alpha; ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, this.size, this.size); }
+    reset(i) { this.x = Math.random()*w; this.y = i?Math.random()*h:h+10; this.s = Math.random()*2; this.v = -(Math.random()*1+0.5); this.a = Math.random()*0.5; }
+    up() { this.y += this.v; this.a -= 0.001; if(this.a<=0 || this.y<-10) this.reset(false); }
+    dr() { ctx.globalAlpha = this.a; ctx.fillStyle = '#ff4500'; ctx.fillRect(this.x, this.y, this.s, this.s); }
   }
-  for(let i=0; i<80; i++) particles.push(new Ash());
-  function loop() { ctx.clearRect(0,0,w,h); particles.forEach(p => {p.update(); p.draw();}); requestAnimationFrame(loop); }
-  window.addEventListener('resize', resize); resize(); loop();
+  for(let i=0;i<70;i++) p.push(new Particle());
+  function loop() { ctx.clearRect(0,0,w,h); p.forEach(x=>{x.up();x.dr();}); requestAnimationFrame(loop); }
+  window.onresize = res; res(); loop();
 })();
 </script>
 </body>
